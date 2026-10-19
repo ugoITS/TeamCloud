@@ -1,0 +1,53 @@
+# Credenziali
+.env
+.env.*
+*.env
+secrets/
+credentials/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Chiavi e certificati
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# VS Code
+.vscode/
+
+# File generati
+.wget-hsts
+*.log
+*.tmp
+*.swp
+*~
+
+# Backup del progetto
+*.backup
+*.backup-*
+*.bak
+*.pre-dns
+backup-html/
+
+# Vecchie pagine non più utilizzate
+web1/
+web2/
+
+# File locali
+Test-NetConnection
+
+
+# Copie precedenti dei file DNS
+*.prima-demo
+*.prima-lan

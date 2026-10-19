@@ -1,0 +1,105 @@
+services:
+  web1:
+    image: nginx:alpine
+    container_name: cloud_web1
+    restart: unless-stopped
+
+    environment:
+      BACKEND_NAME: WEB1
+
+    volumes:
+      - ./web-template/index.template.html:/template/index.template.html:ro
+      - ./web-template/start-web.sh:/start-web.sh:ro
+
+    entrypoint:
+      - /bin/sh
+      - /start-web.sh
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q --spider http://127.0.0.1/ || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+    networks:
+      - rete_web
+
+  web2:
+    image: nginx:alpine
+    container_name: cloud_web2
+    restart: unless-stopped
+
+    environment:
+      BACKEND_NAME: WEB2
+
+    volumes:
+      - ./web-template/index.template.html:/template/index.template.html:ro
+      - ./web-template/start-web.sh:/start-web.sh:ro
+
+    entrypoint:
+      - /bin/sh
+      - /start-web.sh
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q --spider http://127.0.0.1/ || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+    networks:
+      - rete_web
+
+  loadbalancer:
+    image: nginx:alpine
+    container_name: cloud_loadbalancer
+    restart: unless-stopped
+
+    depends_on:
+      - web1
+      - web2
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./loadbalancer/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q --spider http://127.0.0.1/health || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+    networks:
+      - rete_web
+
+networks:
+  rete_web:
+    driver: bridge
