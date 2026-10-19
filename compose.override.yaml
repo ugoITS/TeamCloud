@@ -1,0 +1,108 @@
+services:
+  dns-master:
+    image: internetsystemsconsortium/bind9:9.20
+    container_name: cloud_dns_master
+    restart: unless-stopped
+
+    ports:
+      - "10.10.13.124:53:53/udp"
+      - "10.10.13.124:53:53/tcp"
+
+    volumes:
+      - ./dns-master/named.conf:/etc/bind/named.conf:ro
+      - ./dns-master/db.teamcloud.test:/etc/bind/db.teamcloud.test:ro
+      - dns_master_cache:/var/cache/bind
+
+    networks:
+      rete_dns:
+        ipv4_address: 172.30.0.10
+
+  dns-slave:
+    image: internetsystemsconsortium/bind9:9.20
+    container_name: cloud_dns_slave
+    restart: unless-stopped
+
+    depends_on:
+      - dns-master
+
+    ports:
+      - "127.0.0.1:1053:53/udp"
+      - "127.0.0.1:1053:53/tcp"
+
+    volumes:
+      - ./dns-slave/named.conf:/etc/bind/named.conf:ro
+      - dns_slave_cache:/var/cache/bind
+
+    networks:
+      rete_dns:
+        ipv4_address: 172.30.0.11
+
+  dns-monitor:
+    build:
+      context: ./dns-monitor
+
+    container_name: cloud_dns_monitor
+    restart: unless-stopped
+
+    depends_on:
+      - dns-master
+      - dns-slave
+
+    environment:
+      DNS_ZONE: teamcloud.test
+      DNS_CHECK_RECORD: demo.teamcloud.test
+      DNS_MASTER_HOST: dns-master
+      DNS_SLAVE_HOST: dns-slave
+
+    networks:
+      - rete_web
+      - rete_dns
+
+  attendance-api:
+    build:
+      context: ./attendance-api
+
+    container_name: cloud_attendance_api
+    restart: unless-stopped
+
+    environment:
+      DATABASE_PATH: /data/presenze.db
+
+    volumes:
+      - attendance_data:/data
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import urllib.request;
+          urllib.request.urlopen(
+          'http://127.0.0.1:5000/health',
+          timeout=2)
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+    networks:
+      - rete_web
+
+networks:
+  rete_dns:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  dns_master_cache:
+  dns_slave_cache:
+  attendance_data:

@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Progetto ITS Cloud</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+            background: linear-gradient(135deg, #06172b, #0876a8);
+        }
+
+        main {
+            width: min(1000px, 92%);
+            margin: 40px auto;
+            padding: 40px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        h2 {
+            margin-top: 40px;
+        }
+
+        .descrizione {
+            text-align: center;
+            color: #d6f0ff;
+        }
+
+        .dashboard,
+        .dns-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-top: 30px;
+        }
+
+        .card {
+            padding: 22px;
+            border-radius: 18px;
+            background: rgba(0, 0, 0, 0.22);
+        }
+
+        .etichetta {
+            margin-bottom: 10px;
+            color: #9bdcff;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .valore {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .online {
+            color: #53f4ad;
+        }
+
+        .offline {
+            color: #ff8080;
+        }
+
+        .pallino {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border-radius: 50%;
+            background: #53f4ad;
+            box-shadow: 0 0 14px #53f4ad;
+        }
+
+        .nota {
+            margin-top: 25px;
+            padding: 16px;
+            border-left: 4px solid #53f4ad;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .dns-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .dns-title strong {
+            font-size: 22px;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dns-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dns-row span {
+            color: #c5e6f5;
+        }
+
+        .dns-row strong {
+            text-align: right;
+        }
+
+        .replica-status {
+            margin-top: 20px;
+            padding: 18px;
+            text-align: center;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .sincronizzato {
+            color: #53f4ad;
+            border: 1px solid #53f4ad;
+        }
+
+        .aggiornamento {
+            color: #ffd166;
+            border: 1px solid #ffd166;
+        }
+
+        .errore {
+            color: #ff8080;
+            border: 1px solid #ff8080;
+        }
+
+        .spiegazione {
+            margin-top: 10px;
+            font-size: 13px;
+            font-weight: normal;
+            color: #d6f0ff;
+        }
+
+        @media (max-width: 650px) {
+            .dashboard,
+            .dns-grid {
+                grid-template-columns: 1fr;
+            }
+
+            main {
+                padding: 25px;
+            }
+        }
+    
+    .attendance-panel {
+        margin-top: 25px;
+        padding: 22px;
+        border-radius: 18px;
+        background: rgba(0, 0, 0, 0.22);
+    }
+
+    .attendance-form {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .attendance-form input {
+        flex: 1;
+        padding: 12px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        outline: none;
+        color: white;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .attendance-form input::placeholder {
+        color: #b9d8e8;
+    }
+
+    .attendance-form button,
+    .attendance-delete,
+    .attendance-clear {
+        padding: 11px 15px;
+        border: 0;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .attendance-form button {
+        color: #06172b;
+        background: #53f4ad;
+    }
+
+    .attendance-list {
+        margin: 18px 0 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .attendance-list li {
+        margin-top: 8px;
+        padding: 11px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.07);
+    }
+
+    .attendance-delete {
+        padding: 7px 10px;
+        color: white;
+        background: #dc3545;
+    }
+
+    .attendance-clear {
+        margin-top: 14px;
+        color: white;
+        background: rgba(220, 53, 69, 0.75);
+    }
+
+    .attendance-status {
+        min-height: 20px;
+        margin-top: 12px;
+        color: #9bdcff;
+        font-size: 14px;
+    }
+
+    @media (max-width: 650px) {
+        .attendance-form {
+            flex-direction: column;
+        }
+    }
+
+</style>
+</head>
+
+<body>
+
+<main>
+
+    <h1>Progetto ITS Infrastrutture e Cloud</h1>
+
+    <p class="descrizione">
+        Due server web Docker dietro un load balancer NGINX,
+        con DNS master e DNS slave.
+    </p>
+
+    <!-- SERVER WEB -->
+
+    <section class="dashboard">
+
+        <div class="card">
+            <div class="etichetta">Backend attivo</div>
+            <div class="valore">__BACKEND_NAME__</div>
+        </div>
+
+        <div class="card">
+            <div class="etichetta">Stato</div>
+
+            <div class="valore online">
+                <span class="pallino"></span>
+                ONLINE
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="etichetta">Avviato il</div>
+            <div id="started">Calcolo in corso...</div>
+        </div>
+
+        <div class="card">
+            <div class="etichetta">Tempo online</div>
+            <div class="valore" id="uptime">
+                00g 00h 00m 00s
+            </div>
+        </div>
+
+    </section>
+
+    <div class="nota">
+        Richiesta servita da
+        <strong>__BACKEND_NAME__</strong>.
+
+        Se questo backend smette di funzionare,
+        il load balancer prova a utilizzare l'altro server.
+    </div>
+
+
+    <!-- DNS -->
+
+    <h2>Replica DNS</h2>
+
+    <p class="descrizione">
+        Questa sezione legge in tempo reale i dati
+        del DNS master e del DNS slave.
+    </p>
+
+    <section class="dns-grid">
+
+        <!-- MASTER -->
+
+        <div class="card">
+
+            <div class="dns-title">
+
+                <strong>DNS MASTER</strong>
+
+                <span id="master-status" class="badge">
+                    Controllo...
+                </span>
+
+            </div>
+
+            <div class="dns-row">
+                <span>IP interno</span>
+                <strong>172.30.0.10</strong>
+            </div>
+
+            <div class="dns-row">
+                <span>Seriale zona</span>
+                <strong id="master-serial">---</strong>
+            </div>
+
+            <div class="dns-row">
+                <span>Record</span>
+                <strong id="master-record">---</strong>
+            </div>
+
+            <div class="dns-row">
+                <span>Valore</span>
+                <strong id="master-value">---</strong>
+            </div>
+
+        </div>
+
+
+        <!-- SLAVE -->
+
+        <div class="card">
+
+            <div class="dns-title">
+
+                <strong>DNS SLAVE</strong>
+
+                <span id="slave-status" class="badge">
+                    Controllo...
+                </span>
+
+            </div>
+
+            <div class="dns-row">
+                <span>IP interno</span>
+                <strong>172.30.0.11</strong>
+            </div>
+
+            <div class="dns-row">
+                <span>Seriale zona</span>
+                <strong id="slave-serial">---</strong>
+            </div>
+
+            <div class="dns-row">
+                <span>Record</span>
+                <strong id="slave-record">---</strong>
+            </div>
+
+            <div class="dns-row">
+                <span>Valore</span>
+                <strong id="slave-value">---</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+    <div id="replica-status" class="replica-status">
+        Controllo della replica DNS...
+    </div>
+
+
+        <section
+            class="attendance-panel"
+            id="attendance-panel"
+        >
+            <h2>Presenze oggi a ITS</h2>
+
+            <p>
+                Le presenze sono salvate in uno storage
+                condiviso e rimangono disponibili anche
+                durante il failover tra WEB1 e WEB2.
+            </p>
+
+            <form
+                class="attendance-form"
+                id="attendance-form"
+            >
+                <input
+                    id="attendance-name"
+                    type="text"
+                    maxlength="80"
+                    autocomplete="off"
+                    placeholder="Inserisci un nome di prova"
+                    required
+                >
+
+                <button type="submit">
+                    Salva presenza
+                </button>
+            </form>
+
+            <div
+                class="attendance-status"
+                id="attendance-status"
+            ></div>
+
+            <ul
+                class="attendance-list"
+                id="attendance-list"
+            ></ul>
+
+            <button
+                class="attendance-clear"
+                id="attendance-clear"
+                type="button"
+            >
+                Cancella le presenze di oggi
+            </button>
+        </section>
+
+</main>
+
+
+<script>
+
+    /*
+     * UPTIME DEL SERVER WEB
+     */
+
+    const avvio =
+        Number("__STARTED_AT__") * 1000;
+
+    document.getElementById("started").textContent =
+        new Date(avvio).toLocaleString("it-IT");
+
+
+    function aggiornaTimer() {
+
+        const totale = Math.max(
+            0,
+            Math.floor(
+                (Date.now() - avvio) / 1000
+            )
+        );
+
+        const giorni =
+            Math.floor(totale / 86400);
+
+        const ore =
+            Math.floor(
+                (totale % 86400) / 3600
+            );
+
+        const minuti =
+            Math.floor(
+                (totale % 3600) / 60
+            );
+
+        const secondi =
+            totale % 60;
+
+
+        document.getElementById("uptime").textContent =
+
+            String(giorni).padStart(2, "0")
+            + "g "
+
+            + String(ore).padStart(2, "0")
+            + "h "
+
+            + String(minuti).padStart(2, "0")
+            + "m "
+
+            + String(secondi).padStart(2, "0")
+            + "s";
+    }
+
+
+    /*
+     * MOSTRA I DATI DI UN DNS
+     */
+
+    function mostraDns(nome, dati) {
+
+        const stato =
+            document.getElementById(
+                nome + "-status"
+            );
+
+        const seriale =
+            document.getElementById(
+                nome + "-serial"
+            );
+
+        const record =
+            document.getElementById(
+                nome + "-record"
+            );
+
+        const valore =
+            document.getElementById(
+                nome + "-value"
+            );
+
+
+        if (dati.online) {
+
+            stato.textContent = "ONLINE";
+            stato.className =
+                "badge online";
+
+            seriale.textContent =
+                dati.serial;
+
+            record.textContent =
+                dati.record;
+
+            if (
+                dati.values &&
+                dati.values.length > 0
+            ) {
+
+                valore.textContent =
+                    dati.values.join(", ");
+
+            } else {
+
+                valore.textContent =
+                    "Record non trovato";
+            }
+
+        } else {
+
+            stato.textContent =
+                "OFFLINE";
+
+            stato.className =
+                "badge offline";
+
+            seriale.textContent = "---";
+            record.textContent =
+                dati.record;
+
+            valore.textContent =
+                "Non raggiungibile";
+        }
+    }
+
+
+    /*
+     * CHIAMA IL DNS MONITOR
+     */
+
+    async function controllaReplicaDns() {
+
+        const box =
+            document.getElementById(
+                "replica-status"
+            );
+
+        try {
+
+            const risposta =
+                await fetch(
+                    "/api/dns-status",
+                    {
+                        cache: "no-store"
+                    }
+                );
+
+
+            if (!risposta.ok) {
+                throw new Error(
+                    "Errore HTTP "
+                    + risposta.status
+                );
+            }
+
+
+            const dati =
+                await risposta.json();
+
+
+            mostraDns(
+                "master",
+                dati.master
+            );
+
+            mostraDns(
+                "slave",
+                dati.slave
+            );
+
+
+            if (dati.state === "synced") {
+
+                box.className =
+                    "replica-status sincronizzato";
+
+                box.innerHTML =
+                    "✓ DNS MASTER E DNS SLAVE SINCRONIZZATI"
+                    +
+                    '<div class="spiegazione">'
+                    +
+                    'Il seriale e il record controllato coincidono.'
+                    +
+                    '</div>';
+
+            }
+
+            else if (
+                dati.state === "updating"
+            ) {
+
+                box.className =
+                    "replica-status aggiornamento";
+
+                box.innerHTML =
+                    "⟳ REPLICA DNS IN AGGIORNAMENTO"
+                    +
+                    '<div class="spiegazione">'
+                    +
+                    'Master e slave hanno dati diversi.'
+                    +
+                    '</div>';
+
+            }
+
+            else {
+
+                box.className =
+                    "replica-status errore";
+
+                box.innerHTML =
+                    "✕ UNO DEI DNS NON È RAGGIUNGIBILE";
+            }
+
+        }
+
+        catch (errore) {
+
+            box.className =
+                "replica-status errore";
+
+            box.innerHTML =
+                "✕ IMPOSSIBILE LEGGERE LO STATO DNS"
+                +
+                '<div class="spiegazione">'
+                +
+                errore.message
+                +
+                '</div>';
+        }
+    }
+
+
+    aggiornaTimer();
+
+    setInterval(
+        aggiornaTimer,
+        1000
+    );
+
+
+    controllaReplicaDns();
+
+    /*
+     * Aggiorniamo il pannello DNS
+     * ogni 2 secondi.
+     */
+
+    setInterval(
+        controllaReplicaDns,
+        2000
+    );
+
+</script>
+
+
+    <script>
+        const attendanceList =
+            document.getElementById("attendance-list");
+
+        const attendanceStatus =
+            document.getElementById("attendance-status");
+
+        const attendanceForm =
+            document.getElementById("attendance-form");
+
+        const attendanceName =
+            document.getElementById("attendance-name");
+
+        const attendanceClear =
+            document.getElementById("attendance-clear");
+
+        function attendanceMessage(message, error = false) {
+            attendanceStatus.textContent = message;
+            attendanceStatus.style.color = error
+                ? "#ff8f9a"
+                : "#9bdcff";
+        }
+
+        async function loadAttendance() {
+            try {
+                const response = await fetch(
+                    "/api/presenze",
+                    {
+                        cache: "no-store"
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "HTTP " + response.status
+                    );
+                }
+
+                const data = await response.json();
+
+                attendanceList.innerHTML = "";
+
+                for (const attendance of data.presenze) {
+                    const item =
+                        document.createElement("li");
+
+                    const name =
+                        document.createElement("span");
+
+                    name.textContent = attendance.nome;
+
+                    const button =
+                        document.createElement("button");
+
+                    button.type = "button";
+                    button.className =
+                        "attendance-delete";
+                    button.textContent = "Rimuovi";
+
+                    button.addEventListener(
+                        "click",
+                        async () => {
+                            await deleteAttendance(
+                                attendance.id
+                            );
+                        }
+                    );
+
+                    item.appendChild(name);
+                    item.appendChild(button);
+                    attendanceList.appendChild(item);
+                }
+
+                attendanceMessage(
+                    data.totale +
+                    " presenze registrate oggi"
+                );
+
+            } catch (error) {
+                attendanceMessage(
+                    "Impossibile leggere le presenze: " +
+                    error.message,
+                    true
+                );
+            }
+        }
+
+        async function addAttendance(name) {
+            const response = await fetch(
+                "/api/presenze",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        nome: name
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error || "Errore di salvataggio"
+                );
+            }
+        }
+
+        async function deleteAttendance(id) {
+            try {
+                const response = await fetch(
+                    "/api/presenze/" + id,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "HTTP " + response.status
+                    );
+                }
+
+                await loadAttendance();
+
+            } catch (error) {
+                attendanceMessage(
+                    "Impossibile eliminare: " +
+                    error.message,
+                    true
+                );
+            }
+        }
+
+        attendanceForm.addEventListener(
+            "submit",
+            async (event) => {
+                event.preventDefault();
+
+                const name =
+                    attendanceName.value.trim();
+
+                if (!name) {
+                    return;
+                }
+
+                try {
+                    await addAttendance(name);
+                    attendanceName.value = "";
+                    await loadAttendance();
+
+                } catch (error) {
+                    attendanceMessage(
+                        error.message,
+                        true
+                    );
+                }
+            }
+        );
+
+        attendanceClear.addEventListener(
+            "click",
+            async () => {
+                try {
+                    const response = await fetch(
+                        "/api/presenze",
+                        {
+                            method: "DELETE"
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(
+                            "HTTP " + response.status
+                        );
+                    }
+
+                    await loadAttendance();
+
+                } catch (error) {
+                    attendanceMessage(
+                        "Impossibile cancellare: " +
+                        error.message,
+                        true
+                    );
+                }
+            }
+        );
+
+        loadAttendance();
+        setInterval(loadAttendance, 5000);
+    </script>
+
+</body>
+</html>

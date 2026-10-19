@@ -1,0 +1,20 @@
+$TTL 300
+
+@   IN  SOA ns1.teamcloud.test. admin.teamcloud.test. (
+        2026092204
+        300
+        120
+        604800
+        300
+)
+
+@       IN  NS  ns1.teamcloud.test.
+@       IN  NS  ns2.teamcloud.test.
+
+ns1     IN  A   172.30.0.10
+ns2     IN  A   172.30.0.11
+
+@       IN  A   10.10.13.124
+www     IN  A   10.10.13.124
+test    IN    A    10.10.13.124
+demo    IN  A   10.10.13.124
