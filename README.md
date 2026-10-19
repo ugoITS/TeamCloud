@@ -88,7 +88,14 @@ Uno script Bash osserva gli eventi Docker di WEB1 e WEB2 e invia notifiche di ar
 
 Il token e il Chat ID non sono inclusi nel repository.
 
-## Autore
+## Autori
 
-Damiano Funari  
+Il progetto è stato realizzato dal gruppo TeamCloud:
+
+- Damiano Funari
+- Ugo Quartuccio
+- Pietro Baroni
+- Daniele Borrelli
+
 Progetto ITS Infrastrutture e Cloud
+
